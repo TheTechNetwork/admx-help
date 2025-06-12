@@ -59,7 +59,11 @@ jobs:
           for zip in zips/*.zip; do
             unzip -o "$zip" -d tmp || echo "❌ Failed to unzip $zip"
           done
-          find tmp -type d -name PolicyDefinitions -exec cp -r {}/* admxfiles/ \; || echo "❌ No PolicyDefinitions found"
+          find tmp -type d -name PolicyDefinitions | while read dir; do
+            echo "📂 Copying from $dir"
+            cp -r "$dir"/* admxfiles/ || echo "⚠️ Failed to copy from $dir"
+          done
+
 
       - name: Parse ADMX files to JSON
         run: |
