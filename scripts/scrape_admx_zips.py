@@ -5,19 +5,19 @@ def main():
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
 
-        # Step 1: Go to the download page
+        print("Navigating to download details page...")
         page.goto("https://www.microsoft.com/en-us/download/details.aspx?id=55319")
-        page.wait_for_selector("#dropdownLang")
 
-        # Step 2: Click the download button
-        print("Clicking download...")
-        page.click("#dlbtn")  # ID of the "Download" button
+        # 🔄 Skip waiting for dropdownLang — not needed
+        # Go straight to clicking the Download button
+        print("Clicking download button...")
+        page.click("#dlbtn", timeout=10000)
 
-        # Step 3: Wait for redirect to confirmation page
-        page.wait_for_url("**/download/confirmation.aspx*", timeout=10000)
+        # Wait for redirect to confirmation page
+        page.wait_for_url("**/download/confirmation.aspx*", timeout=15000)
         print(f"Redirected to: {page.url}")
 
-        # Step 4: Scrape all .zip links
+        # Get all .zip links
         links = page.locator("a")
         zip_urls = []
 
@@ -30,10 +30,9 @@ def main():
         for url in zip_urls:
             print(url)
 
-        # Step 5: Save to file
         with open("zip_urls.txt", "w") as f:
             for url in zip_urls:
-                f.write(url + "\n")
+                f.write(url + "\\n")
 
         browser.close()
 
