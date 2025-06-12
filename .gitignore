@@ -1,0 +1,25 @@
+# Gitignore for ADMX Help Replacement project
+
+# Generated files by GitHub Actions
+/_site/
+/src/frontend/data/
+/admx_download_stg/
+
+# Python cache and environment
+__pycache__/
+.pytest_cache/
+.venv/
+venv/
+*.pyc
+*.egg-info/
+.mypy_cache/
+
+# Node.js (if you decide to use it later)
+node_modules/
+npm-debug.log
+.yarn-integrity
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
