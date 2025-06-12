@@ -49,29 +49,12 @@ def parse_admx(admx_path, adml_path):
         value_names = []
         value_types = []
 
-        reg_key_node = policy.find('registryKey')
-        if reg_key_node is not None:
-            reg_key = reg_key_node.attrib.get('key', '')
-        else:
-            reg_settings = policy.find('registrySettings')
-            if reg_settings is not None:
-                reg_key = reg_settings.attrib.get('key', '')
-                val_name = reg_settings.attrib.get('valueName')
-                val_type = reg_settings.attrib.get('valueType', 'REG_SZ')
-                if val_name:
-                    value_names.append(val_name)
-                    value_types.append(val_type)
-
-        for elem in policy.findall(".//value"):
-            val_name = elem.attrib.get('valueName')
-            val_type = elem.attrib.get('valueType', 'REG_SZ')
-            if val_name:
-                value_names.append(val_name)
-                value_types.append(val_type)
-
-        for elem in policy.findall(".//elements/*"):
-            val_name = elem.attrib.get('id')
-            val_type = elem.attrib.get('valueType', 'REG_SZ')
+        for reg in policy.findall(".//registrySetting"):
+            key = reg.attrib.get('key', '')
+            val_name = reg.attrib.get('valueName')
+            val_type = reg.attrib.get('valueType', 'REG_SZ')
+            if key:
+                reg_key = key
             if val_name:
                 value_names.append(val_name)
                 value_types.append(val_type)
