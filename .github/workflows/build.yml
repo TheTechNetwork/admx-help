@@ -20,30 +20,13 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
-        run: pip install beautifulsoup4
-
-      - name: Download confirmation page
-        run: curl -L -A "Mozilla/5.0" "https://www.microsoft.com/en-us/download/confirmation.aspx?id=55319" -o page.html
-        
-      - name: Upload downloaded HTML for inspection
-        uses: actions/upload-artifact@v4
-        with:
-          name: page-html
-          path: page.html
-
-
-      - name: Parse ZIP URLs from static HTML
-        run: python scripts/parse_static_html.py
-
-      - name: Download ADMX ZIPs
+      - name: Install Playwright
         run: |
-          mkdir zips
-          while IFS= read -r url; do
-            fname=$(basename "$url")
-            echo "Downloading $fname"
-            curl -L "$url" -o "zips/$fname"
-          done < zip_urls.txt
+          pip install playwright
+          playwright install --with-deps
+
+      - name: Scrape ZIP URLs with Playwright
+        run: python scripts/scrape_admx_zips.py
 
       - name: Extract PolicyDefinitions from ZIPs
         run: |
