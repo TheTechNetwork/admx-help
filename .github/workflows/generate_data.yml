@@ -15,37 +15,54 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # --- Install PowerShell and Evergreen ---
-      # CORRECTED ACTION: Use PSModule/Install-PowerShell
+      # --- Install PowerShell ---
       - name: Install PowerShell Core
         uses: PSModule/Install-PowerShell@v1
         with:
-          # You can specify a precise version or use 'latest'
-          # Version: '7.4.2' # Example for a specific version
-          Version: 'latest' # Recommended for getting the newest stable Evergreen supports
+          Version: 'latest' # Use 'latest' for the newest stable PowerShell Core
 
+      # --- Install Evergreen PowerShell Module ---
+      # This step will install Evergreen to a specific, well-known path within the runner's home directory.
       - name: Install Evergreen PowerShell Module
-        # Note: 'pwsh' is the command for PowerShell Core
-        run: pwsh -Command "Install-Module -Name Evergreen -Force -Scope CurrentUser -Repository PSGallery -AllowClobber"
+        shell: pwsh # Ensure this step runs directly in PowerShell
+        run: |
+          # Define a common module path in the runner's home directory for CurrentUser scope
+          # This ensures it's always in a predictable location for the current user.
+          $ModulePath = "$($env:HOME)/.local/share/PowerShell/Modules"
+          
+          # Ensure this path exists
+          mkdir -p $ModulePath
+          
+          # Install the module to this specific path
+          # Use -ErrorAction Stop to fail fast if installation has issues
+          Install-Module -Name Evergreen -Force -Scope CurrentUser -Repository PSGallery -AllowClobber -Destination "$ModulePath" -ErrorAction Stop
+          
+          # Verify the module is now available by listing it
+          Get-Module -ListAvailable -Name Evergreen | Out-Host
+          if (-not (Get-Module -ListAvailable -Name Evergreen)) {
+              Write-Error 'Evergreen module was installed but is not found. Check PSModulePath.'
+              exit 1
+          }
 
       # --- Prepare directories for downloaded ADMX ---
       - name: Create ADMX download directory
         run: mkdir -p admx_download_stg
 
-      # --- Run Evergreen to download ADMX files ---
+      # --- Download ADMX using Evergreen ---
+      # This step explicitly imports the module before using its cmdlets.
       - name: Download ADMX using Evergreen
+        shell: pwsh # Ensure this step runs directly in PowerShell
         run: |
-          pwsh -Command "
-            Import-Module Evergreen
-            # Example: Download Windows 10/11 ADMX, Microsoft Edge ADMX, Office ADMX
-            # You can customize which products to download.
-            # Use -Destination to specify where they should be saved.
-            # Use -Force to overwrite existing files on subsequent runs.
-            Get-EvergreenAdmx -Product Windows -OSVersions 'Windows10AndLater' -Destination admx_download_stg -Force
-            Get-EvergreenAdmx -Product MSEdge -Destination admx_download_stg -Force
-            Get-EvergreenAdmx -Product Office -Destination admx_download_stg -Force
-            # Add more products supported by Evergreen as needed (e.g., OneDrive, FSLogix, etc.)
-          "
+          # Explicitly import the module in this session.
+          # It should now be discoverable because it was installed to a standard CurrentUser path
+          # and the PSModulePath should automatically include that location.
+          Import-Module Evergreen -ErrorAction Stop
+
+          # Now run the Get-EvergreenAdmx cmdlets
+          Get-EvergreenAdmx -Product Windows -OSVersions 'Windows10AndLater' -Destination admx_download_stg -Force
+          Get-EvergreenAdmx -Product MSEdge -Destination admx_download_stg -Force
+          Get-EvergreenAdmx -Product Office -Destination admx_download_stg -Force
+          # Add more products supported by Evergreen as needed (e.g., OneDrive, FSLogix, etc.)
         # Note: Evergreen downloads ADMX/ADML into a 'PolicyDefinitions' subfolder within the destination.
 
       - name: Set up Python
