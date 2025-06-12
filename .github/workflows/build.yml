@@ -1,0 +1,41 @@
+name: Build ADMX Viewer
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Requirements
+        run: pip install -r scripts/requirements.txt
+
+      - name: Download ADMX Zip
+        run: |
+          curl -L -o admx.zip "https://www.catalog.update.microsoft.com/Search.aspx?q=Administrative%20Templates"
+          unzip -o admx.zip -d admx || true
+
+      - name: Copy PolicyDefinitions
+        run: |
+          mkdir -p admxfiles
+          find admx -type d -name PolicyDefinitions -exec cp -r {}/* admxfiles/ \;
+
+      - name: Run Parser
+        run: python scripts/parse_admx.py admxfiles/ public/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
