@@ -1,44 +1,27 @@
 name: Generate ADMX Data and Deploy to Pages
 
-# This workflow can be triggered manually from the GitHub UI (workflow_dispatch)
-# or on a monthly schedule (cron).
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 1 * *' # Run once a month at 00:00 UTC on the 1st day of the month
+    - cron: '0 0 1 * *'
 
 jobs:
   build-and-deploy:
-    runs-on: windows-latest # CRITICAL CHANGE: Using a Windows runner for better PowerShell compatibility
+    runs-on: windows-latest # Using Windows runner for better PowerShell compatibility
     permissions:
-      contents: write # This permission is required to push generated files back to the repo
-                      # by the peaceiris/actions-gh-pages action.
+      contents: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4 # Action to check out your repository code
+        uses: actions/checkout@v4
 
-      # --- PowerShell Setup ---
-      # Installs the latest stable PowerShell Core (pwsh) on the runner.
-      # This action is cross-platform and works on Windows too.
-      #- name: Install PowerShell Core
-      #  uses: PSModule/Install-PowerShell@v1
-      #  with:
-      #    Version: 'latest' # Installs the latest stable PowerShell Core version
-
-      # --- Install Evergreen PowerShell Module ---
-      # Installs the Evergreen module and captures its exact installation path.
       - name: Install Evergreen PowerShell Module
-        id: install_evergreen # Assign an ID to this step to reference its outputs
-        shell: pwsh # Ensures this step runs directly in PowerShell Core
+        id: install_evergreen
+        shell: pwsh
         run: |
           Write-Host "Installing Evergreen PowerShell Module..."
-          # Install the Evergreen module for the current user.
-          # -ErrorAction Stop will cause the workflow to fail immediately if installation encounters an issue.
           Install-Module -Name Evergreen -Force -Scope CurrentUser -Repository PSGallery -AllowClobber -ErrorAction Stop
           
-          # Find the actual base directory where Evergreen was installed.
-          # Get-Module returns a PSModuleInfo object; its ModuleBase property contains the path.
           $EvergreenModulePath = (Get-Module -ListAvailable -Name Evergreen).ModuleBase
           
           if (-not $EvergreenModulePath) {
@@ -48,33 +31,25 @@ jobs:
           
           Write-Host "Evergreen Module Base Path found by Get-Module: ${EvergreenModulePath}"
           
-          # Verify the existence of the module manifest file directly
-          if (Test-Path "${EvergreenModulePath}\Evergreen.psd1") { # Using backslash for Windows paths
+          if (Test-Path "${EvergreenModulePath}\Evergreen.psd1") {
               Write-Host "SUCCESS: Evergreen.psd1 manifest file found at expected location!"
           } else {
-              Write-Error "ERROR: Evergreen.psd1 manifest file NOT found at expected location: ${EvergreenModulePath}\Evergreen.psd1" # Backslash
-              # List contents of the ModuleBase directory to debug
+              Write-Error "ERROR: Evergreen.psd1 manifest file NOT found at expected location: ${EvergreenModulePath}\Evergreen.psd1"
               Write-Host "Listing contents of ${EvergreenModulePath}:"
-              Get-ChildItem -Path "${EvergreenModulePath}" # Using Get-ChildItem, the PowerShell equivalent of ls
-              exit 1 # Fail if the manifest isn't there
+              Get-ChildItem -Path "${EvergreenModulePath}"
+              exit 1
           }
 
-          # Set the found path as a step output. This output can be referenced by subsequent steps.
           echo "evergreen_path=${EvergreenModulePath}" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
-      # --- Directory Preparation ---
-      # Creates the directory where Evergreen will download the ADMX/ADML files.
-      # mkdir -p (Linux) is equivalent to mkdir -Force (PowerShell on Windows) for creating parent dirs.
       - name: Create ADMX download directory
-        shell: pwsh # Ensure this runs in PowerShell
+        shell: pwsh
         run: mkdir -Force admx_download_stg
 
       # --- Download ADMX using Evergreen (with detailed diagnostics) ---
-      # This step imports the Evergreen module using its exact path and then runs Get-EvergreenAdmx.
       - name: Download ADMX using Evergreen
-        shell: pwsh # Ensures this step runs directly in PowerShell Core
+        shell: pwsh
         run: |
-          # Retrieve the Evergreen module path from the output of the previous step.
           $EvergreenModulePath = "${{ steps.install_evergreen.outputs.evergreen_path }}"
           
           if (-not $EvergreenModulePath) {
@@ -88,32 +63,26 @@ jobs:
           # --- DIAGNOSTICS: File System Check ---
           Write-Host "--- Diagnostics: File System Check ---"
           Write-Host "Checking if Evergreen ModuleBase directory exists: ${EvergreenModulePath}"
-          if (Test-Path "${EvergreenModulePath}") { # Corrected variable interpolation
+          if (Test-Path "${EvergreenModulePath}") {
               Write-Host "Directory exists. Listing contents recursively:"
-              Get-ChildItem -Recurse -Path "${EvergreenModulePath}" # Using Get-ChildItem -Recurse for Windows
-              # Check for the specific manifest file
-              if (Test-Path "${EvergreenModulePath}\Evergreen.psd1") { # Backslash
-                  Write-Host "SUCCESS: Evergreen.psd1 manifest file found at ${EvergreenModulePath}\Evergreen.psd1" # Backslash
-                  # Show permissions (relevant for Linux) - Get-Item works on Windows
+              Get-ChildItem -Recurse -Path "${EvergreenModulePath}"
+              if (Test-Path "${EvergreenModulePath}\Evergreen.psd1") {
+                  Write-Host "SUCCESS: Evergreen.psd1 manifest file found at ${EvergreenModulePath}\Evergreen.psd1"
                   Write-Host "Permissions for Evergreen.psd1:"
-                  (Get-Item "${EvergreenModulePath}\Evergreen.psd1").Permissions # For Windows, .Permissions is usually what you want
+                  (Get-Item "${EvergreenModulePath}\Evergreen.psd1").Permissions
               } else {
-                  Write-Error "ERROR: Evergreen.psd1 manifest NOT found directly inside ${EvergreenModulePath}" # Backslash
+                  Write-Error "ERROR: Evergreen.psd1 manifest NOT found directly inside ${EvergreenModulePath}"
               }
           } else {
-              Write-Error "ERROR: Evergreen ModuleBase directory DOES NOT EXIST: ${EvergreenModulePath}" # Corrected variable interpolation
+              Write-Error "ERROR: Evergreen ModuleBase directory DOES NOT EXIST: ${EvergreenModulePath}"
               exit 1
           }
           Write-Host "--- End Diagnostics ---"
 
           # --- PSModulePath Management ---
           Write-Host "Current PSModulePath (BEFORE modification): ${env:PSModulePath}"
-          # Add the module's exact base directory to the current session's PSModulePath.
-          # This makes the 'Evergreen' module discoverable by its name for Import-Module.
-          # It's crucial this modification happens in the *same run block* as Import-Module.
-          # PowerShell handles path separators well, but using backslash might be more natural on Windows.
-          $env:PSModulePath = "${EvergreenModulePath};${env:PSModulePath}" # Backslash
-          Write-Host "Updated PSModulePath for this session: ${env:PSModulePath}" # Corrected variable interpolation
+          $env:PSModulePath = "${EvergreenModulePath};${env:PSModulePath}"
+          Write-Host "Updated PSModulePath for this session: ${env:PSModulePath}"
           
           # --- Module Import Attempt ---
           Write-Host "Attempting to import module by name: Evergreen"
@@ -121,47 +90,43 @@ jobs:
 
           Write-Host "Evergreen module imported successfully. Proceeding with ADMX download..."
 
-          # Now, run the Get-EvergreenAdmx cmdlets to download the ADMX files.
-          # -Destination specifies the folder created earlier for downloaded ADMX.
+          # --- NEW DIAGNOSTIC: List Exported Commands ---
+          Write-Host "--- Diagnostics: Listing Exported Commands from Evergreen Module ---"
+          # This command will show what cmdlets/functions the Evergreen module is actually making available.
+          Get-Command -Module Evergreen | Out-Host
+          Write-Host "--- End Exported Commands Diagnostics ---"
+          # --- END NEW DIAGNOSTIC ---
+
+          # Now, run the Get-EvergreenAdmx cmdlets
           Get-EvergreenAdmx -Product Windows -OSVersions 'Windows10AndLater' -Destination admx_download_stg -Force
           Get-EvergreenAdmx -Product MSEdge -Destination admx_download_stg -Force
           Get-EvergreenAdmx -Product Office -Destination admx_download_stg -Force
-          # Add or remove products here based on which ADMX files you want to include.
           Write-Host "ADMX download complete."
 
       # --- Python Setup & Parsing ---
       - name: Set up Python
-        uses: actions/setup-python@v5 # Action to set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.x' # Use the latest Python 3 version
+          python-version: '3.x'
 
       - name: Install Python dependencies
-        run: pip install lxml # Installs the lxml library for robust XML parsing
+        run: pip install lxml
 
-      # Creates the necessary output directories for your frontend and generated data.
       - name: Create output directory for frontend and data
         run: |
-          mkdir -p src/frontend/data # Directory for your JSON data files
-          mkdir -p _site              # Root directory for GitHub Pages content
+          mkdir -p src/frontend/data
+          mkdir -p _site
 
-      # Runs your Python script to parse the downloaded ADMX/ADML files
-      # and generate the JSON data consumed by your frontend.
       - name: Run ADMX Parsing Script
-        # Your Python script expects the path to the PolicyDefinitions folder.
-        # Evergreen places ADMX/ADML files in 'PolicyDefinitions' inside the specified destination.
         run: python src/python/parse_admx.py admx_download_stg/PolicyDefinitions
 
-      # --- Frontend Deployment ---
-      # Copies your frontend assets (HTML, CSS, JS) and the generated JSON data
-      # into the _site directory, which will be published.
       - name: Copy Frontend Assets to _site
         run: cp -r src/frontend/* _site/
 
-      # Deploys the content of the _site directory to your GitHub Pages branch.
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4 # Robust action for GitHub Pages deployment
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }} # Automatically provided GitHub token
-          publish_dir: ./_site                      # Directory to publish
-          publish_branch: gh-pages                      # The branch GitHub Pages will serve from (can be 'gh-pages' too)
-          force_orphan: true                        # Overwrites existing content on the publish branch (good for static sites)
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          publish_branch: gh-pages
+          force_orphan: true
