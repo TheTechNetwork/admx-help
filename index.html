@@ -20,7 +20,7 @@
   <script>
     fetch('policies.json').then(r => r.json()).then(data => {
       const fuse = new Fuse(data, {
-        keys: ['name', 'display_name', 'registry_key', 'value_names'],
+        keys: ['name', 'display_name', 'registry_key', 'value_names', 'description', 'gpo_path'],
         threshold: 0.3
       });
       const render = items => {
