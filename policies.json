@@ -1,1 +1,210 @@
-[]
+[
+  {
+    "name": "Pol_MSS_AutoAdminLogon",
+    "display_name": "$(string.DisableAutoLogon)",
+    "explanation": "$(string.DisableAutoLogon_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_AutoReboot",
+    "display_name": "$(string.AutoReboot)",
+    "explanation": "$(string.AutoReboot_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_AutoShareWks",
+    "display_name": "$(string.AdminShares)",
+    "explanation": "$(string.AdminShares_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_AutoShareServer",
+    "display_name": "$(string.AdminSharesServer)",
+    "explanation": "$(string.AdminSharesServer_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_DisableSavePassword",
+    "display_name": "$(string.DisableSavePassword)",
+    "explanation": "$(string.DisableSavePassword_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_EnableDeadGWDetect",
+    "display_name": "$(string.EnableDeadGWDetect)",
+    "explanation": "$(string.EnableDeadGWDetect_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_EnableICMPRedirect",
+    "display_name": "$(string.EnableICMPRedirect)",
+    "explanation": "$(string.EnableICMPRedirect_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_HideFromBrowseList",
+    "display_name": "$(string.HideFromBrowseList)",
+    "explanation": "$(string.HideFromBrowseList_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_NoNameReleaseOnDemand",
+    "display_name": "$(string.NoNameReleaseOnDemand)",
+    "explanation": "$(string.NoNameReleaseOnDemand_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_PerformRouterDiscovery",
+    "display_name": "$(string.PerformRouterDiscovery)",
+    "explanation": "$(string.PerformRouterDiscovery_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_SafeDllSearchMode",
+    "display_name": "$(string.SafeDllSearchMode)",
+    "explanation": "$(string.SafeDllSearchMode_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_ScreenSaverGracePeriod",
+    "display_name": "$(string.ScreenSaverGracePeriod)",
+    "explanation": "$(string.ScreenSaverGracePeriod_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_TcpMaxDataRetransmissions",
+    "display_name": "$(string.TcpMaxDataRetransmissions)",
+    "explanation": "$(string.TcpMaxDataRetransmissions_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_TcpMaxDataRetransmissionsIPv6",
+    "display_name": "$(string.TcpMaxDataRetransmissionsIPv6)",
+    "explanation": "$(string.TcpMaxDataRetransmissionsIPv6_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_DisableIPSourceRouting",
+    "display_name": "$(string.DisableIPSourceRouting)",
+    "explanation": "$(string.DisableIPSourceRouting_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_DisableIPSourceRoutingIPv6",
+    "display_name": "$(string.DisableIPSourceRoutingIPv6)",
+    "explanation": "$(string.DisableIPSourceRoutingIPv6_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_NtfsDisable8dot3NameCreation",
+    "display_name": "$(string.NtfsDisable8dot3NameCreation)",
+    "explanation": "$(string.NtfsDisable8dot3NameCreation_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_KeepAliveTime",
+    "display_name": "$(string.KeepAliveTime)",
+    "explanation": "$(string.KeepAliveTime_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_NoDefaultExempt",
+    "display_name": "$(string.NoDefaultExempt)",
+    "explanation": "$(string.NoDefaultExempt_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_SynAttackProtect",
+    "display_name": "$(string.SynAttackProtect)",
+    "explanation": "$(string.SynAttackProtect_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_TcpMaxConnectResponseRetransmissions",
+    "display_name": "$(string.TcpMaxConnectResponseRetransmissions)",
+    "explanation": "$(string.TcpMaxConnectResponseRetransmissions_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "Pol_MSS_WarningLevel",
+    "display_name": "$(string.WarningLevel)",
+    "explanation": "$(string.WarningLevel_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "POL_AdmPwd_Enabled",
+    "display_name": "$(string.POL_AdmPwd_Enabled)",
+    "explanation": "$(string.POL_AdmPwd_Enabled_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "POL_AdmPwd",
+    "display_name": "$(string.POL_AdmPwd)",
+    "explanation": "$(string.POL_AdmPwd_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "POL_AdmPwd_AdminName",
+    "display_name": "$(string.POL_AdmPwd_AdminName)",
+    "explanation": "$(string.POL_AdmPwd_AdminName_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  },
+  {
+    "name": "POL_AdmPwd_DontAllowPwdExpirationBehindPolicy",
+    "display_name": "$(string.POL_AdmPwd_DontAllowPwdExpirationBehindPolicy)",
+    "explanation": "$(string.POL_AdmPwd_DontAllowPwdExpirationBehindPolicy_Help)",
+    "class": "Machine",
+    "registry_key": "",
+    "value_name": ""
+  }
+]
