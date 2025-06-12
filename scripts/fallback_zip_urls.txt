@@ -1,0 +1,6 @@
+https://download.microsoft.com/download/2/2/c/22c685c3-e7e0-4a44-b738-c676c9ec6216/Windows%2010%20version%2022H2%20Security%20Baseline.zip
+https://download.microsoft.com/download/7/1/0/710003bd-04d4-42e3-8942-5fe292abceef/Windows%2011%20v23H2%20Security%20Baseline.zip
+https://download.microsoft.com/download/d/e/e/dee1d91b-71ef-4d8d-ae61-44a3962dfc95/Windows%2011%20v24H2%20Security%20Baseline.zip
+https://download.microsoft.com/download/6/f/3/6f3d8a2a-f504-4802-9021-1761ab9ac373/Windows%20Server%202025%20Security%20Baseline.zip
+https://download.microsoft.com/download/b/e/3/be3c01ae-94a9-4c5c-a90e-c58b7c0bde10/Microsoft%20365%20Apps%20for%20Enterprise%202412.zip
+https://download.microsoft.com/download/e/b/d/ebd632a9-dc84-4609-bab4-bf8445beae98/Microsoft%20Edge%20v128%20Security%20Baseline.zip
