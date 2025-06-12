@@ -4,34 +4,54 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '0 0 * * 0'
+    - cron: '0 0 * * 0'  # Weekly, Sunday
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
+
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Install Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install Requirements
+      - name: Install dependencies
         run: pip install -r scripts/requirements.txt
 
-      - name: Download ADMX Zip
+      - name: Scrape Microsoft Download Page and Download ZIPs
+        shell: pwsh
         run: |
-          curl -L -o admx.zip "https://www.catalog.update.microsoft.com/Search.aspx?q=Administrative%20Templates"
-          unzip -o admx.zip -d admx || true
+          mkdir zips
+          $page = Invoke-WebRequest -Uri "https://www.microsoft.com/en-us/download/details.aspx?id=55319"
+          $links = $page.Links | Where-Object { $_.href -match "\.zip$" }
+          foreach ($link in $links) {
+              $url = $link.href
+              if ($url -notmatch '^https?://') {
+                  $url = "https://download.microsoft.com$url"
+              }
+              $filename = [System.IO.Path]::GetFileName($url)
+              Write-Host "Downloading $filename from $url"
+              Invoke-WebRequest -Uri $url -OutFile ".\\zips\\$filename"
+          }
 
-      - name: Copy PolicyDefinitions
+      - name: Extract PolicyDefinitions from ZIPs
+        shell: pwsh
         run: |
-          mkdir -p admxfiles
-          find admx -type d -name PolicyDefinitions -exec cp -r {}/* admxfiles/ \;
+          mkdir admxfiles
+          Get-ChildItem -Path zips -Filter *.zip | ForEach-Object {
+              $dest = New-Item -ItemType Directory -Path tmp -Force
+              Expand-Archive -Path $_.FullName -DestinationPath $dest.FullName -Force
+              Get-ChildItem -Path $dest.FullName -Recurse -Directory | Where-Object { $_.Name -eq "PolicyDefinitions" } | ForEach-Object {
+                  Copy-Item -Path "$($_.FullName)\\*" -Destination admxfiles -Recurse -Force -ErrorAction SilentlyContinue
+              }
+              Remove-Item tmp -Recurse -Force
+          }
 
-      - name: Run Parser
+      - name: Run ADMX Parser
         run: python scripts/parse_admx.py admxfiles/ public/
 
       - name: Deploy to GitHub Pages
