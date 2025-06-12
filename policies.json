@@ -285,8 +285,6 @@
       "ELM_AdmPwd_PasswordAgeDays"
     ],
     "value_types": [
-      "REG_SZ",
-      "REG_SZ",
       "REG_SZ"
     ],
     "scope": "machine"
