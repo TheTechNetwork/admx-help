@@ -1,23 +1,42 @@
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError
 
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
 
-        print("Navigating to download details page...")
+        print("Navigating to Microsoft download page...")
         page.goto("https://www.microsoft.com/en-us/download/details.aspx?id=55319")
 
-        # 🔄 Skip waiting for dropdownLang — not needed
-        # Go straight to clicking the Download button
-        print("Clicking download button...")
-        page.click("#dlbtn", timeout=10000)
+        print("Waiting for Download button...")
+        try:
+            page.wait_for_selector("a#dlbtn, #btnDownload", timeout=15000)
+        except TimeoutError:
+            print("❌ Download button not found. Exiting.")
+            browser.close()
+            return
 
-        # Wait for redirect to confirmation page
-        page.wait_for_url("**/download/confirmation.aspx*", timeout=15000)
-        print(f"Redirected to: {page.url}")
+        print("Clicking Download button...")
+        try:
+            # Try both possible selectors
+            if page.locator("#dlbtn").is_visible():
+                page.click("#dlbtn")
+            else:
+                page.click("#btnDownload")
+        except Exception as e:
+            print(f"❌ Failed to click download button: {e}")
+            browser.close()
+            return
 
-        # Get all .zip links
+        print("Waiting for redirect to confirmation page...")
+        try:
+            page.wait_for_url("**/download/confirmation.aspx*", timeout=15000)
+        except TimeoutError:
+            print("❌ Redirect to confirmation page failed.")
+            browser.close()
+            return
+
+        print(f"Scraping from: {page.url}")
         links = page.locator("a")
         zip_urls = []
 
@@ -26,7 +45,7 @@ def main():
             if href and href.endswith(".zip"):
                 zip_urls.append(href)
 
-        print(f"Found {len(zip_urls)} zip URLs")
+        print(f"✅ Found {len(zip_urls)} zip URLs")
         for url in zip_urls:
             print(url)
 
