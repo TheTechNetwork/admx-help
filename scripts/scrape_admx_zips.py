@@ -1,21 +1,27 @@
+import requests
 from bs4 import BeautifulSoup
 
 def main():
-    with open("page.html", "r", encoding="utf-8") as f:
-        html = f.read()
+    url = "https://www.microsoft.com/en-us/download/confirmation.aspx?id=55319"
+    print(f"Fetching {url} ...")
 
-    soup = BeautifulSoup(html, "html.parser")
-    links = []
+    resp = requests.get(url)
+    soup = BeautifulSoup(resp.text, "html.parser")
+
+    zip_links = []
 
     for a in soup.find_all("a", href=True):
         href = a["href"]
-        if ".zip" in href and "download.microsoft.com" in href:
-            links.append(href)
+        if href.endswith(".zip") and "download.microsoft.com" in href:
+            zip_links.append(href)
 
-    print(f"✅ Found {len(links)} zip links")
+    print(f"✅ Found {len(zip_links)} .zip URLs:")
+    for link in zip_links:
+        print(link)
+
     with open("zip_urls.txt", "w") as f:
-        for url in links:
-            f.write(url + "\n")
+        for link in zip_links:
+            f.write(link + "\n")
 
 if __name__ == "__main__":
     main()
