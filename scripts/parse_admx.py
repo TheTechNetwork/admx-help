@@ -1,88 +1,80 @@
 import os
-import xml.etree.ElementTree as ET
+import sys
 import json
+import xml.etree.ElementTree as ET
+from collections import defaultdict
 
-def parse_admx(admx_dir):
-    results = []
+def load_strings(admx_dir):
+    strings = {}
     for file in os.listdir(admx_dir):
-        if file.endswith(".admx"):
-            filepath = os.path.join(admx_dir, file)
-            try:
-                tree = ET.parse(filepath)
-                root = tree.getroot()
-                policies = root.findall(".//policy")
-                for policy in policies:
-                    name = policy.attrib.get("name")
-                    class_type = policy.attrib.get("class")
-                    display_name = policy.attrib.get("displayName", "")
-                    explain_text = policy.attrib.get("explainText", "")
-                    regkey_el = policy.find(".//registryKey")
-                    regvalue_el = policy.find(".//valueName")
-                    results.append({
-                        "name": name,
-                        "display_name": display_name,
-                        "explanation": explain_text,
-                        "class": class_type,
-                        "registry_key": regkey_el.text if regkey_el is not None else "",
-                        "value_name": regvalue_el.text if regvalue_el is not None else ""
-                    })
-            except Exception as e:
-                print(f"Error parsing {filepath}: {e}")
-    return results
+        if file.endswith(".adml"):
+            tree = ET.parse(os.path.join(admx_dir, file))
+            root = tree.getroot()
+            ns = {"aml": "http://schemas.microsoft.com/GroupPolicy/2006/07/AdministrativeTemplates"}
+            for string in root.findall(".//aml:string", ns):
+                strings[string.attrib["id"]] = string.text
+    return strings
 
-def generate_html(output_dir):
-    html = """
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>ADMX Policy Viewer</title>
-  <script src="https://cdn.jsdelivr.net/npm/fuse.js"></script>
-</head>
-<body>
-  <h1>ADMX Policy Viewer</h1>
-  <input type="text" id="search" placeholder="Search policies...">
-  <ul id="results"></ul>
-  <script>
-    fetch('policies.json').then(r => r.json()).then(data => {
-      const fuse = new Fuse(data, { keys: ['name', 'display_name', 'registry_key', 'value_name'], threshold: 0.3 });
-      document.getElementById('search').addEventListener('input', (e) => {
-        const result = fuse.search(e.target.value);
-        document.getElementById('results').innerHTML =
-          result.map(r => `<li><b>${r.item.name}</b>: ${r.item.registry_key} / ${r.item.value_name}</li>`).join('');
-      });
-    });
-  </script>
-</body>
-</html>
-"""
-    with open(os.path.join(output_dir, "index.html"), "w", encoding="utf-8") as f:
-        f.write(html)
+def parse_admx_file(filepath, strings):
+    tree = ET.parse(filepath)
+    root = tree.getroot()
+    ns = {"admx": "http://schemas.microsoft.com/GroupPolicy/2006/07/AdministrativeTemplates"}
+
+    policies = []
+
+    for policy in root.findall(".//admx:policy", ns):
+        name = policy.attrib["name"]
+        display_name_id = policy.attrib.get("displayName", "")
+        display_name = strings.get(display_name_id, display_name_id)
+
+        explain_id = policy.attrib.get("explainText", "")
+        description = strings.get(explain_id, "")
+
+        class_type = policy.attrib.get("class", "Machine")
+        scope = "Machine" if class_type.lower() == "machine" else "User"
+
+        supported_on = policy.attrib.get("supportedOn", "")
+
+        # Registry
+        reg_key = None
+        value_name = None
+        for reg_elem in policy.findall(".//admx:registrySetting", ns):
+            reg_key = reg_elem.attrib.get("key", reg_key)
+            value_name = reg_elem.attrib.get("valueName", value_name)
+
+        policies.append({
+            "name": name,
+            "display_name": display_name,
+            "description": description,
+            "gpo_path": "TODO",  # Will add later if you want categories
+            "registry_key": reg_key or "",
+            "value_name": value_name or "",
+            "scope": scope,
+            "supported_on": supported_on,
+        })
+    return policies
 
 def main():
-    import sys
     if len(sys.argv) < 3:
-        print("Usage: parse_admx.py <admx_dir> <output_dir>")
-        return
+        print("Usage: parse_admx.py <input_admx_dir> <output_dir>")
+        sys.exit(1)
 
     admx_dir = sys.argv[1]
     output_dir = sys.argv[2]
+    os.makedirs(output_dir, exist_ok=True)
 
-    # Avoid clobbering any system file if accidentally given an invalid output path
-    if not os.path.isdir(output_dir):
-        os.makedirs(output_dir, exist_ok=True)
+    strings = load_strings(admx_dir)
+    all_policies = []
 
-    print(f"Parsing ADMX files from: {admx_dir}")
-    policies = parse_admx(admx_dir)
+    for file in os.listdir(admx_dir):
+        if file.endswith(".admx"):
+            filepath = os.path.join(admx_dir, file)
+            all_policies.extend(parse_admx_file(filepath, strings))
 
-    print(f"Writing {len(policies)} policies to: {output_dir}/policies.json")
     with open(os.path.join(output_dir, "policies.json"), "w", encoding="utf-8") as f:
-        json.dump(policies, f, indent=2)
+        json.dump(all_policies, f, indent=2, ensure_ascii=False)
 
-    print("Generating HTML viewer...")
-    generate_html(output_dir)
-
-    print("Done.")
+    print(f"✅ Parsed {len(all_policies)} policies.")
 
 if __name__ == "__main__":
     main()
