@@ -53,7 +53,6 @@ def parse_admx(admx_path, adml_path):
         if reg_key_node is not None:
             reg_key = reg_key_node.attrib.get('key', '')
         else:
-            # Try registrySettings path
             reg_settings = policy.find('registrySettings')
             if reg_settings is not None:
                 reg_key = reg_settings.attrib.get('key', '')
@@ -89,8 +88,8 @@ def parse_admx(admx_path, adml_path):
             'description': description,
             'gpo_path': gpo_path,
             'registry_key': reg_key,
-            'value_names': value_names,
-            'value_types': value_types,
+            'value_names': list(set(value_names)),
+            'value_types': list(set(value_types)),
             'scope': scope,
         })
 
