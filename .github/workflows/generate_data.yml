@@ -22,42 +22,50 @@ jobs:
           Version: 'latest' # Installs the latest stable PowerShell Core
 
       # --- Install Evergreen PowerShell Module ---
-      # This step installs Evergreen to PowerShell's default CurrentUser module path.
+      # This step installs Evergreen and then determines its exact installation path,
+      # saving it as a step output for subsequent steps.
       - name: Install Evergreen PowerShell Module
+        id: install_evergreen # Give this step an ID to reference its outputs
         shell: pwsh # Ensure this step runs directly in PowerShell
         run: |
           # Install the module for the current user.
-          # -ErrorAction Stop will cause the workflow to fail if installation has issues.
           Install-Module -Name Evergreen -Force -Scope CurrentUser -Repository PSGallery -AllowClobber -ErrorAction Stop
           
-          # Verify the module is now available by listing it.
-          Get-Module -ListAvailable -Name Evergreen | Out-Host
-          if (-not (Get-Module -ListAvailable -Name Evergreen)) {
-              Write-Error 'Evergreen module was installed but is not found. Installation might have failed.'
+          # Find the actual path where Evergreen was installed.
+          # Get-Module will return the path where the module's .psd1 (or equivalent) file is located.
+          $EvergreenModulePath = (Get-Module -ListAvailable -Name Evergreen).ModuleBase
+          
+          if (-not $EvergreenModulePath) {
+              Write-Error "Evergreen module was installed but its path could not be determined. Aborting."
               exit 1
           }
+          
+          Write-Host "Evergreen Module Base Path: $EvergreenModulePath"
+          
+          # Set the path as a step output. This output can be referenced by other steps.
+          echo "evergreen_path=$EvergreenModulePath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Create ADMX download directory
         run: mkdir -p admx_download_stg
 
       # --- Download ADMX using Evergreen ---
-      # This step explicitly imports the module within this session and then uses its cmdlets.
+      # This step uses the path from the previous step's output to explicitly import the module.
       - name: Download ADMX using Evergreen
         shell: pwsh # Ensure this step runs directly in PowerShell
         run: |
-          # Define the common CurrentUser module path for Linux runners.
-          # This is typically where Install-Module -Scope CurrentUser places modules.
-          $CurrentUserModulePath = "$($env:HOME)/.local/share/PowerShell/Modules"
+          # Retrieve the Evergreen module path from the output of the previous step.
+          $EvergreenModulePath = "${{ steps.install_evergreen.outputs.evergreen_path }}"
           
-          # Add this path to the current session's PSModulePath if it's not already there.
-          # This ensures Import-Module can find Evergreen.
-          if ($env:PSModulePath -notlike "*$CurrentUserModulePath*") {
-              $env:PSModulePath = "$CurrentUserModulePath;$env:PSModulePath"
-              Write-Host "Updated PSModulePath for this session: $env:PSModulePath"
+          if (-not $EvergreenModulePath) {
+              Write-Error "Evergreen module path was not found from previous step's output. Aborting."
+              exit 1
           }
 
-          # Explicitly import the Evergreen module in this session before using its cmdlets.
-          Import-Module Evergreen -ErrorAction Stop
+          Write-Host "Attempting to import Evergreen from: $EvergreenModulePath"
+          
+          # Explicitly import the Evergreen module using its full path.
+          Import-Module -Name Evergreen -FullyQualifiedPath "$EvergreenModulePath/Evergreen.psd1" -ErrorAction Stop
+          # Using -FullyQualifiedPath and pointing to the .psd1 (module manifest) is the most reliable way.
 
           # Now, run the Get-EvergreenAdmx cmdlets to download the ADMX files.
           Get-EvergreenAdmx -Product Windows -OSVersions 'Windows10AndLater' -Destination admx_download_stg -Force
@@ -93,5 +101,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
-          publish_branch: main # Or 'gh-pages' if you prefer a separate branch for published content
+          publish_branch: gh-pages # Or 'gh-pages' if you prefer a separate branch for published content
           force_orphan: true # Cleans up old content on the publish_branch
