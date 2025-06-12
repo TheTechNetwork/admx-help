@@ -68,7 +68,7 @@ jobs:
       - name: Parse ADMX files to JSON
         run: |
           mkdir -p public
-          python scripts/parse_admx.py admxfiles/ public/
+          python scripts/parse_admx.py admxfiles public
 
       - name: Debug public output
         run: ls -R public || echo "❌ Nothing in public"
