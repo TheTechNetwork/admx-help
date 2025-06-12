@@ -1,0 +1,72 @@
+name: Generate ADMX Data and Deploy to Pages
+
+on:
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+  schedule:
+    - cron: '0 0 1 * *' # Run once a month at 00:00 UTC on the 1st day of the month
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to push generated files back to the repo
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # --- Install PowerShell and Evergreen ---
+      - name: Setup PowerShell
+        uses: actions/setup-powershell@v1 # Ensure PowerShell is set up
+
+      - name: Install Evergreen PowerShell Module
+        run: pwsh -Command "Install-Module -Name Evergreen -Force -Scope CurrentUser -Repository PSGallery -AllowClobber"
+
+      # --- Prepare directories for downloaded ADMX ---
+      - name: Create ADMX download directory
+        run: mkdir -p admx_download_stg
+
+      # --- Run Evergreen to download ADMX files ---
+      - name: Download ADMX using Evergreen
+        run: |
+          pwsh -Command "
+            Import-Module Evergreen
+            # Example: Download Windows 10/11 ADMX, Microsoft Edge ADMX, Office ADMX
+            # You can customize which products to download.
+            # Use -Destination to specify where they should be saved.
+            # Use -Force to overwrite existing files on subsequent runs.
+            Get-EvergreenAdmx -Product Windows -OSVersions 'Windows10AndLater' -Destination admx_download_stg -Force
+            Get-EvergreenAdmx -Product MSEdge -Destination admx_download_stg -Force
+            Get-EvergreenAdmx -Product Office -Destination admx_download_stg -Force
+            # Add more products supported by Evergreen as needed (e.g., OneDrive, FSLogix, etc.)
+          "
+        # Note: Evergreen downloads ADMX/ADML into a 'PolicyDefinitions' subfolder within the destination.
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Python dependencies
+        run: pip install lxml
+
+      - name: Create output directory for frontend and data
+        run: |
+          mkdir -p src/frontend/data
+          mkdir -p _site
+
+      - name: Run ADMX Parsing Script
+        # Point your parser to the location where Evergreen saved the ADMX files
+        # The PolicyDefinitions folder is inside admx_download_stg
+        run: python src/python/parse_admx.py admx_download_stg/PolicyDefinitions
+
+      - name: Copy Frontend Assets to _site
+        run: cp -r src/frontend/* _site/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          publish_branch: main # Or gh-pages if you prefer a separate branch for published content
+          force_orphan: true # Cleans up old content on the publish_branch
