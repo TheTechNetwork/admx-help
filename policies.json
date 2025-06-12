@@ -1,1 +1,318 @@
-[]
+[
+  {
+    "name": "Pol_MSS_AutoAdminLogon",
+    "display_name": "Pol_MSS_AutoAdminLogon",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [],
+    "value_types": [],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_AutoReboot",
+    "display_name": "Pol_MSS_AutoReboot",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [],
+    "value_types": [],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_AutoShareWks",
+    "display_name": "Pol_MSS_AutoShareWks",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [],
+    "value_types": [],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_AutoShareServer",
+    "display_name": "Pol_MSS_AutoShareServer",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [],
+    "value_types": [],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_DisableSavePassword",
+    "display_name": "Pol_MSS_DisableSavePassword",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [],
+    "value_types": [],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_EnableDeadGWDetect",
+    "display_name": "Pol_MSS_EnableDeadGWDetect",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [],
+    "value_types": [],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_EnableICMPRedirect",
+    "display_name": "Pol_MSS_EnableICMPRedirect",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [],
+    "value_types": [],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_HideFromBrowseList",
+    "display_name": "Pol_MSS_HideFromBrowseList",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [],
+    "value_types": [],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_NoNameReleaseOnDemand",
+    "display_name": "Pol_MSS_NoNameReleaseOnDemand",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [],
+    "value_types": [],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_PerformRouterDiscovery",
+    "display_name": "Pol_MSS_PerformRouterDiscovery",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [],
+    "value_types": [],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_SafeDllSearchMode",
+    "display_name": "Pol_MSS_SafeDllSearchMode",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [],
+    "value_types": [],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_ScreenSaverGracePeriod",
+    "display_name": "Pol_MSS_ScreenSaverGracePeriod",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [
+      "ScreenSaverGracePeriod"
+    ],
+    "value_types": [
+      "REG_SZ"
+    ],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_TcpMaxDataRetransmissions",
+    "display_name": "Pol_MSS_TcpMaxDataRetransmissions",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [
+      "TcpMaxDataRetransmissions"
+    ],
+    "value_types": [
+      "REG_SZ"
+    ],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_TcpMaxDataRetransmissionsIPv6",
+    "display_name": "Pol_MSS_TcpMaxDataRetransmissionsIPv6",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [
+      "TcpMaxDataRetransmissions"
+    ],
+    "value_types": [
+      "REG_SZ"
+    ],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_DisableIPSourceRouting",
+    "display_name": "Pol_MSS_DisableIPSourceRouting",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [
+      "DisableIPSourceRouting"
+    ],
+    "value_types": [
+      "REG_SZ"
+    ],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_DisableIPSourceRoutingIPv6",
+    "display_name": "Pol_MSS_DisableIPSourceRoutingIPv6",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [
+      "DisableIPSourceRoutingIPv6"
+    ],
+    "value_types": [
+      "REG_SZ"
+    ],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_NtfsDisable8dot3NameCreation",
+    "display_name": "Pol_MSS_NtfsDisable8dot3NameCreation",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [
+      "NtfsDisable8dot3NameCreation"
+    ],
+    "value_types": [
+      "REG_SZ"
+    ],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_KeepAliveTime",
+    "display_name": "Pol_MSS_KeepAliveTime",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [
+      "KeepAliveTime"
+    ],
+    "value_types": [
+      "REG_SZ"
+    ],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_NoDefaultExempt",
+    "display_name": "Pol_MSS_NoDefaultExempt",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [
+      "NoDefaultExempt"
+    ],
+    "value_types": [
+      "REG_SZ"
+    ],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_SynAttackProtect",
+    "display_name": "Pol_MSS_SynAttackProtect",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [
+      "SynAttackProtect"
+    ],
+    "value_types": [
+      "REG_SZ"
+    ],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_TcpMaxConnectResponseRetransmissions",
+    "display_name": "Pol_MSS_TcpMaxConnectResponseRetransmissions",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [
+      "TcpMaxConnectResponseRetransmissions"
+    ],
+    "value_types": [
+      "REG_SZ"
+    ],
+    "scope": "machine"
+  },
+  {
+    "name": "Pol_MSS_WarningLevel",
+    "display_name": "Pol_MSS_WarningLevel",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [
+      "WarningLevel"
+    ],
+    "value_types": [
+      "REG_SZ"
+    ],
+    "scope": "machine"
+  },
+  {
+    "name": "POL_AdmPwd_Enabled",
+    "display_name": "POL_AdmPwd_Enabled",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [],
+    "value_types": [],
+    "scope": "machine"
+  },
+  {
+    "name": "POL_AdmPwd",
+    "display_name": "POL_AdmPwd",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [
+      "ELM_AdmPwd_PasswordComplexity",
+      "ELM_AdmPwd_PasswordLength",
+      "ELM_AdmPwd_PasswordAgeDays"
+    ],
+    "value_types": [
+      "REG_SZ",
+      "REG_SZ",
+      "REG_SZ"
+    ],
+    "scope": "machine"
+  },
+  {
+    "name": "POL_AdmPwd_AdminName",
+    "display_name": "POL_AdmPwd_AdminName",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [
+      "TXT_AdminAccountName"
+    ],
+    "value_types": [
+      "REG_SZ"
+    ],
+    "scope": "machine"
+  },
+  {
+    "name": "POL_AdmPwd_DontAllowPwdExpirationBehindPolicy",
+    "display_name": "POL_AdmPwd_DontAllowPwdExpirationBehindPolicy",
+    "description": "",
+    "gpo_path": "",
+    "registry_key": "",
+    "value_names": [],
+    "value_types": [],
+    "scope": "machine"
+  }
+]

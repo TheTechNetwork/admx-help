@@ -4,19 +4,41 @@
   <meta charset="UTF-8">
   <title>ADMX Policy Viewer</title>
   <script src="https://cdn.jsdelivr.net/npm/fuse.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 1em; }
+    input { width: 100%; padding: 0.5em; font-size: 16px; }
+    .result { margin-top: 1em; }
+    .policy { border: 1px solid #ccc; padding: 1em; margin-bottom: 1em; border-radius: 5px; }
+    .path { font-style: italic; color: #666; }
+    .reg { font-family: monospace; color: #444; }
+  </style>
 </head>
 <body>
   <h1>ADMX Policy Viewer</h1>
-  <input type="text" id="search" placeholder="Search policies">
-  <ul id="results"></ul>
+  <input type="text" id="search" placeholder="Search policies...">
+  <div class="result" id="results"></div>
   <script>
     fetch('policies.json').then(r => r.json()).then(data => {
-      const fuse = new Fuse(data, { keys: ['name', 'registry_key', 'value_name'] });
-      document.getElementById('search').addEventListener('input', (e) => {
-        const result = fuse.search(e.target.value);
-        document.getElementById('results').innerHTML =
-          result.map(r => `<li><b>${r.item.name}</b>: ${r.item.registry_key} / ${r.item.value_name}</li>`).join('');
+      const fuse = new Fuse(data, {
+        keys: ['name', 'display_name', 'registry_key', 'value_names'],
+        threshold: 0.3
       });
+      const render = items => {
+        const el = document.getElementById('results');
+        el.innerHTML = items.map(p => `
+          <div class="policy">
+            <b>${p.display_name}</b><br>
+            <div class="path">${p.gpo_path} [${p.scope}]</div>
+            <div class="reg">${p.registry_key}\${p.value_names.join(', ')}</div>
+            <p>${p.description}</p>
+          </div>`
+        ).join('');
+      };
+      document.getElementById('search').addEventListener('input', e => {
+        const results = fuse.search(e.target.value).map(r => r.item);
+        render(results);
+      });
+      render(data);
     });
   </script>
 </body>
