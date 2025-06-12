@@ -20,20 +20,10 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright
-          restore-keys: |
-            ${{ runner.os }}-playwright
-
       - name: Install dependencies
-        run: |
-          pip install -r scripts/requirements.txt
-          playwright install --with-deps
+        run: pip install -r scripts/requirements.txt
 
-      - name: Scrape ZIP URLs with Playwright
+      - name: Scrape ZIP URLs
         run: python scripts/scrape_admx_zips.py
 
       - name: Download ADMX ZIPs
@@ -51,7 +41,7 @@ jobs:
           for zip in zips/*.zip; do
             unzip -o "$zip" -d tmp
           done
-          find tmp -type d -name PolicyDefinitions -exec cp -r {}/* admxfiles/ \\;
+          find tmp -type d -name PolicyDefinitions -exec cp -r {}/* admxfiles/ \;
 
       - name: Run ADMX Parser
         run: python scripts/parse_admx.py admxfiles/ public/
