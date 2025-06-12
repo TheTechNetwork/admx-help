@@ -13,7 +13,7 @@ def load_adml_strings(adml_path):
     for string in root.findall('.//w:string', ns):
         id_attr = string.attrib.get('id')
         if id_attr:
-            strings[id_attr] = string.text
+            strings[id_attr] = string.text or ''
     return strings
 
 def load_categories(admx_root, strings):
@@ -44,22 +44,38 @@ def parse_admx(admx_path, adml_path):
         display_name = strings.get(policy.attrib.get('displayName', ''), policy_id)
         class_type = policy.attrib.get('class', 'Machine').lower()
         scope = 'machine' if class_type == 'machine' else 'user'
-        reg_key_node = policy.find('registryKey')
-        reg_key = reg_key_node.attrib['key'] if reg_key_node is not None else ''
 
-        values = []
+        reg_key = ""
+        value_names = []
+        value_types = []
+
+        reg_key_node = policy.find('registryKey')
+        if reg_key_node is not None:
+            reg_key = reg_key_node.attrib.get('key', '')
+        else:
+            # Try registrySettings path
+            reg_settings = policy.find('registrySettings')
+            if reg_settings is not None:
+                reg_key = reg_settings.attrib.get('key', '')
+                val_name = reg_settings.attrib.get('valueName')
+                val_type = reg_settings.attrib.get('valueType', 'REG_SZ')
+                if val_name:
+                    value_names.append(val_name)
+                    value_types.append(val_type)
+
         for elem in policy.findall(".//value"):
             val_name = elem.attrib.get('valueName')
             val_type = elem.attrib.get('valueType', 'REG_SZ')
             if val_name:
-                values.append({'name': val_name, 'type': val_type})
+                value_names.append(val_name)
+                value_types.append(val_type)
 
-        if not values:
-            for elem in policy.findall(".//elements/*"):
-                val_name = elem.attrib.get('id')
-                val_type = elem.attrib.get('valueType', 'REG_SZ')
-                if val_name:
-                    values.append({'name': val_name, 'type': val_type})
+        for elem in policy.findall(".//elements/*"):
+            val_name = elem.attrib.get('id')
+            val_type = elem.attrib.get('valueType', 'REG_SZ')
+            if val_name:
+                value_names.append(val_name)
+                value_types.append(val_type)
 
         desc_id = policy.attrib.get('explainText')
         description = strings.get(desc_id, '') if desc_id else ''
@@ -73,8 +89,8 @@ def parse_admx(admx_path, adml_path):
             'description': description,
             'gpo_path': gpo_path,
             'registry_key': reg_key,
-            'value_names': [v['name'] for v in values],
-            'value_types': [v['type'] for v in values],
+            'value_names': value_names,
+            'value_types': value_types,
             'scope': scope,
         })
 
@@ -124,7 +140,7 @@ INDEX_HTML = """<!DOCTYPE html>
   <script>
     fetch('policies.json').then(r => r.json()).then(data => {
       const fuse = new Fuse(data, {
-        keys: ['name', 'display_name', 'registry_key', 'value_names'],
+        keys: ['name', 'display_name', 'registry_key', 'value_names', 'description', 'gpo_path'],
         threshold: 0.3
       });
       const render = items => {
