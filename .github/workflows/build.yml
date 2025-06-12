@@ -25,10 +25,19 @@ jobs:
           pip install playwright
           playwright install --with-deps
 
-      - name: Scrape ZIP URLs with Playwright
+      - name: Scrape ZIP URLs
         run: python scripts/scrape_admx_zips.py
 
-      - name: Extract PolicyDefinitions from ZIPs
+      - name: Download ADMX ZIPs
+        run: |
+          mkdir zips
+          while IFS= read -r url; do
+            fname=$(basename "$url")
+            echo "Downloading $fname"
+            curl -L "$url" -o "zips/$fname"
+          done < zip_urls.txt
+
+      - name: Extract ADMX files
         run: |
           mkdir admxfiles
           for zip in zips/*.zip; do
