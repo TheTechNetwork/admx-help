@@ -21,10 +21,10 @@ jobs:
       # --- PowerShell Setup ---
       # Installs the latest stable PowerShell Core (pwsh) on the runner.
       # This action is cross-platform and works on Windows too.
-      - name: Install PowerShell Core
-        uses: PSModule/Install-PowerShell@v1
-        with:
-          Version: 'latest' # Installs the latest stable PowerShell Core version
+      #- name: Install PowerShell Core
+      #  uses: PSModule/Install-PowerShell@v1
+      #  with:
+      #    Version: 'latest' # Installs the latest stable PowerShell Core version
 
       # --- Install Evergreen PowerShell Module ---
       # Installs the Evergreen module and captures its exact installation path.
