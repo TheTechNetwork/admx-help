@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest # Use the latest Ubuntu runner
+    runs-on: windows-latest # CRITICAL CHANGE: Using a Windows runner for better PowerShell compatibility
     permissions:
       contents: write # This permission is required to push generated files back to the repo
                       # by the peaceiris/actions-gh-pages action.
@@ -20,6 +20,7 @@ jobs:
 
       # --- PowerShell Setup ---
       # Installs the latest stable PowerShell Core (pwsh) on the runner.
+      # This action is cross-platform and works on Windows too.
       - name: Install PowerShell Core
         uses: PSModule/Install-PowerShell@v1
         with:
@@ -48,24 +49,25 @@ jobs:
           Write-Host "Evergreen Module Base Path found by Get-Module: ${EvergreenModulePath}"
           
           # Verify the existence of the module manifest file directly
-          if (Test-Path "${EvergreenModulePath}/Evergreen.psd1") {
+          if (Test-Path "${EvergreenModulePath}\Evergreen.psd1") { # Using backslash for Windows paths
               Write-Host "SUCCESS: Evergreen.psd1 manifest file found at expected location!"
           } else {
-              Write-Error "ERROR: Evergreen.psd1 manifest file NOT found at expected location: ${EvergreenModulePath}/Evergreen.psd1"
+              Write-Error "ERROR: Evergreen.psd1 manifest file NOT found at expected location: ${EvergreenModulePath}\Evergreen.psd1" # Backslash
               # List contents of the ModuleBase directory to debug
               Write-Host "Listing contents of ${EvergreenModulePath}:"
-              ls -Path "${EvergreenModulePath}" # Corrected variable interpolation
+              Get-ChildItem -Path "${EvergreenModulePath}" # Using Get-ChildItem, the PowerShell equivalent of ls
               exit 1 # Fail if the manifest isn't there
           }
 
           # Set the found path as a step output. This output can be referenced by subsequent steps.
-          # This is the standard way to pass information between steps in GitHub Actions.
           echo "evergreen_path=${EvergreenModulePath}" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       # --- Directory Preparation ---
       # Creates the directory where Evergreen will download the ADMX/ADML files.
+      # mkdir -p (Linux) is equivalent to mkdir -Force (PowerShell on Windows) for creating parent dirs.
       - name: Create ADMX download directory
-        run: mkdir -p admx_download_stg
+        shell: pwsh # Ensure this runs in PowerShell
+        run: mkdir -Force admx_download_stg
 
       # --- Download ADMX using Evergreen (with detailed diagnostics) ---
       # This step imports the Evergreen module using its exact path and then runs Get-EvergreenAdmx.
@@ -73,7 +75,6 @@ jobs:
         shell: pwsh # Ensures this step runs directly in PowerShell Core
         run: |
           # Retrieve the Evergreen module path from the output of the previous step.
-          # This path is the module's 'ModuleBase' (e.g., /home/runner/.local/share/powershell/Modules/Evergreen/2505.2104).
           $EvergreenModulePath = "${{ steps.install_evergreen.outputs.evergreen_path }}"
           
           if (-not $EvergreenModulePath) {
@@ -89,17 +90,15 @@ jobs:
           Write-Host "Checking if Evergreen ModuleBase directory exists: ${EvergreenModulePath}"
           if (Test-Path "${EvergreenModulePath}") { # Corrected variable interpolation
               Write-Host "Directory exists. Listing contents recursively:"
-              ls -Recurse -Path "${EvergreenModulePath}" # Corrected variable interpolation
+              Get-ChildItem -Recurse -Path "${EvergreenModulePath}" # Using Get-ChildItem -Recurse for Windows
               # Check for the specific manifest file
-              if (Test-Path "${EvergreenModulePath}/Evergreen.psd1") { # Corrected variable interpolation
-                  Write-Host "SUCCESS: Evergreen.psd1 manifest file found at ${EvergreenModulePath}/Evergreen.psd1" # Corrected variable interpolation
-                  # Show permissions (relevant for Linux)
+              if (Test-Path "${EvergreenModulePath}\Evergreen.psd1") { # Backslash
+                  Write-Host "SUCCESS: Evergreen.psd1 manifest file found at ${EvergreenModulePath}\Evergreen.psd1" # Backslash
+                  # Show permissions (relevant for Linux) - Get-Item works on Windows
                   Write-Host "Permissions for Evergreen.psd1:"
-                  Get-Item "${EvergreenModulePath}/Evergreen.psd1" | Select-Object -ExpandProperty Mode # Corrected variable interpolation
+                  (Get-Item "${EvergreenModulePath}\Evergreen.psd1").Permissions # For Windows, .Permissions is usually what you want
               } else {
-                  Write-Error "ERROR: Evergreen.psd1 manifest NOT found directly inside ${EvergreenModulePath}" # Corrected variable interpolation
-                  # This is the most likely culprit given the error message.
-                  # It means the module structure is different than expected, or installation was incomplete.
+                  Write-Error "ERROR: Evergreen.psd1 manifest NOT found directly inside ${EvergreenModulePath}" # Backslash
               }
           } else {
               Write-Error "ERROR: Evergreen ModuleBase directory DOES NOT EXIST: ${EvergreenModulePath}" # Corrected variable interpolation
@@ -112,7 +111,8 @@ jobs:
           # Add the module's exact base directory to the current session's PSModulePath.
           # This makes the 'Evergreen' module discoverable by its name for Import-Module.
           # It's crucial this modification happens in the *same run block* as Import-Module.
-          $env:PSModulePath = "${EvergreenModulePath};${env:PSModulePath}" # Corrected variable interpolation
+          # PowerShell handles path separators well, but using backslash might be more natural on Windows.
+          $env:PSModulePath = "${EvergreenModulePath};${env:PSModulePath}" # Backslash
           Write-Host "Updated PSModulePath for this session: ${env:PSModulePath}" # Corrected variable interpolation
           
           # --- Module Import Attempt ---
@@ -127,8 +127,6 @@ jobs:
           Get-EvergreenAdmx -Product MSEdge -Destination admx_download_stg -Force
           Get-EvergreenAdmx -Product Office -Destination admx_download_stg -Force
           # Add or remove products here based on which ADMX files you want to include.
-          # Example: Get-EvergreenAdmx -Product OneDrive -Destination admx_download_stg -Force
-          # Example: Get-EvergreenAdmx -Product FSLogix -Destination admx_download_stg -Force
           Write-Host "ADMX download complete."
 
       # --- Python Setup & Parsing ---
