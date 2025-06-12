@@ -15,55 +15,55 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # --- Install PowerShell ---
+      # --- Install PowerShell Core ---
       - name: Install PowerShell Core
         uses: PSModule/Install-PowerShell@v1
         with:
-          Version: 'latest' # Use 'latest' for the newest stable PowerShell Core
+          Version: 'latest' # Installs the latest stable PowerShell Core
 
       # --- Install Evergreen PowerShell Module ---
-      # This step will install Evergreen to a specific, well-known path within the runner's home directory.
+      # This step installs Evergreen to PowerShell's default CurrentUser module path.
       - name: Install Evergreen PowerShell Module
         shell: pwsh # Ensure this step runs directly in PowerShell
         run: |
-          # Define a common module path in the runner's home directory for CurrentUser scope
-          # This ensures it's always in a predictable location for the current user.
-          $ModulePath = "$($env:HOME)/.local/share/PowerShell/Modules"
+          # Install the module for the current user.
+          # -ErrorAction Stop will cause the workflow to fail if installation has issues.
+          Install-Module -Name Evergreen -Force -Scope CurrentUser -Repository PSGallery -AllowClobber -ErrorAction Stop
           
-          # Ensure this path exists
-          mkdir -p $ModulePath
-          
-          # Install the module to this specific path
-          # Use -ErrorAction Stop to fail fast if installation has issues
-          Install-Module -Name Evergreen -Force -Scope CurrentUser -Repository PSGallery -AllowClobber -Destination "$ModulePath" -ErrorAction Stop
-          
-          # Verify the module is now available by listing it
+          # Verify the module is now available by listing it.
           Get-Module -ListAvailable -Name Evergreen | Out-Host
           if (-not (Get-Module -ListAvailable -Name Evergreen)) {
-              Write-Error 'Evergreen module was installed but is not found. Check PSModulePath.'
+              Write-Error 'Evergreen module was installed but is not found. Installation might have failed.'
               exit 1
           }
 
-      # --- Prepare directories for downloaded ADMX ---
       - name: Create ADMX download directory
         run: mkdir -p admx_download_stg
 
       # --- Download ADMX using Evergreen ---
-      # This step explicitly imports the module before using its cmdlets.
+      # This step explicitly imports the module within this session and then uses its cmdlets.
       - name: Download ADMX using Evergreen
         shell: pwsh # Ensure this step runs directly in PowerShell
         run: |
-          # Explicitly import the module in this session.
-          # It should now be discoverable because it was installed to a standard CurrentUser path
-          # and the PSModulePath should automatically include that location.
+          # Define the common CurrentUser module path for Linux runners.
+          # This is typically where Install-Module -Scope CurrentUser places modules.
+          $CurrentUserModulePath = "$($env:HOME)/.local/share/PowerShell/Modules"
+          
+          # Add this path to the current session's PSModulePath if it's not already there.
+          # This ensures Import-Module can find Evergreen.
+          if ($env:PSModulePath -notlike "*$CurrentUserModulePath*") {
+              $env:PSModulePath = "$CurrentUserModulePath;$env:PSModulePath"
+              Write-Host "Updated PSModulePath for this session: $env:PSModulePath"
+          }
+
+          # Explicitly import the Evergreen module in this session before using its cmdlets.
           Import-Module Evergreen -ErrorAction Stop
 
-          # Now run the Get-EvergreenAdmx cmdlets
+          # Now, run the Get-EvergreenAdmx cmdlets to download the ADMX files.
           Get-EvergreenAdmx -Product Windows -OSVersions 'Windows10AndLater' -Destination admx_download_stg -Force
           Get-EvergreenAdmx -Product MSEdge -Destination admx_download_stg -Force
           Get-EvergreenAdmx -Product Office -Destination admx_download_stg -Force
-          # Add more products supported by Evergreen as needed (e.g., OneDrive, FSLogix, etc.)
-        # Note: Evergreen downloads ADMX/ADML into a 'PolicyDefinitions' subfolder within the destination.
+          # You can add more products supported by Evergreen here (e.g., OneDrive, FSLogix, etc.).
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -79,17 +79,19 @@ jobs:
           mkdir -p _site
 
       - name: Run ADMX Parsing Script
-        # Point your parser to the location where Evergreen saved the ADMX files
-        # The PolicyDefinitions folder is inside admx_download_stg
+        # Your Python script will parse the ADMX files downloaded by Evergreen.
+        # Evergreen places them in a 'PolicyDefinitions' subfolder within the destination.
         run: python src/python/parse_admx.py admx_download_stg/PolicyDefinitions
 
       - name: Copy Frontend Assets to _site
+        # Move your HTML, CSS, JS, and the generated JSON data to the _site directory for GitHub Pages.
         run: cp -r src/frontend/* _site/
 
       - name: Deploy to GitHub Pages
+        # This action handles the deployment of the _site directory to GitHub Pages.
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
-          publish_branch: main # Or gh-pages if you prefer a separate branch for published content
+          publish_branch: main # Or 'gh-pages' if you prefer a separate branch for published content
           force_orphan: true # Cleans up old content on the publish_branch
