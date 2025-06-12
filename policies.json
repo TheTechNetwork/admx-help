@@ -115,12 +115,8 @@
     "description": "",
     "gpo_path": "",
     "registry_key": "",
-    "value_names": [
-      "ScreenSaverGracePeriod"
-    ],
-    "value_types": [
-      "REG_SZ"
-    ],
+    "value_names": [],
+    "value_types": [],
     "scope": "machine"
   },
   {
@@ -129,12 +125,8 @@
     "description": "",
     "gpo_path": "",
     "registry_key": "",
-    "value_names": [
-      "TcpMaxDataRetransmissions"
-    ],
-    "value_types": [
-      "REG_SZ"
-    ],
+    "value_names": [],
+    "value_types": [],
     "scope": "machine"
   },
   {
@@ -143,12 +135,8 @@
     "description": "",
     "gpo_path": "",
     "registry_key": "",
-    "value_names": [
-      "TcpMaxDataRetransmissions"
-    ],
-    "value_types": [
-      "REG_SZ"
-    ],
+    "value_names": [],
+    "value_types": [],
     "scope": "machine"
   },
   {
@@ -157,12 +145,8 @@
     "description": "",
     "gpo_path": "",
     "registry_key": "",
-    "value_names": [
-      "DisableIPSourceRouting"
-    ],
-    "value_types": [
-      "REG_SZ"
-    ],
+    "value_names": [],
+    "value_types": [],
     "scope": "machine"
   },
   {
@@ -171,12 +155,8 @@
     "description": "",
     "gpo_path": "",
     "registry_key": "",
-    "value_names": [
-      "DisableIPSourceRoutingIPv6"
-    ],
-    "value_types": [
-      "REG_SZ"
-    ],
+    "value_names": [],
+    "value_types": [],
     "scope": "machine"
   },
   {
@@ -185,12 +165,8 @@
     "description": "",
     "gpo_path": "",
     "registry_key": "",
-    "value_names": [
-      "NtfsDisable8dot3NameCreation"
-    ],
-    "value_types": [
-      "REG_SZ"
-    ],
+    "value_names": [],
+    "value_types": [],
     "scope": "machine"
   },
   {
@@ -199,12 +175,8 @@
     "description": "",
     "gpo_path": "",
     "registry_key": "",
-    "value_names": [
-      "KeepAliveTime"
-    ],
-    "value_types": [
-      "REG_SZ"
-    ],
+    "value_names": [],
+    "value_types": [],
     "scope": "machine"
   },
   {
@@ -213,12 +185,8 @@
     "description": "",
     "gpo_path": "",
     "registry_key": "",
-    "value_names": [
-      "NoDefaultExempt"
-    ],
-    "value_types": [
-      "REG_SZ"
-    ],
+    "value_names": [],
+    "value_types": [],
     "scope": "machine"
   },
   {
@@ -227,12 +195,8 @@
     "description": "",
     "gpo_path": "",
     "registry_key": "",
-    "value_names": [
-      "SynAttackProtect"
-    ],
-    "value_types": [
-      "REG_SZ"
-    ],
+    "value_names": [],
+    "value_types": [],
     "scope": "machine"
   },
   {
@@ -241,12 +205,8 @@
     "description": "",
     "gpo_path": "",
     "registry_key": "",
-    "value_names": [
-      "TcpMaxConnectResponseRetransmissions"
-    ],
-    "value_types": [
-      "REG_SZ"
-    ],
+    "value_names": [],
+    "value_types": [],
     "scope": "machine"
   },
   {
@@ -255,12 +215,8 @@
     "description": "",
     "gpo_path": "",
     "registry_key": "",
-    "value_names": [
-      "WarningLevel"
-    ],
-    "value_types": [
-      "REG_SZ"
-    ],
+    "value_names": [],
+    "value_types": [],
     "scope": "machine"
   },
   {
@@ -279,14 +235,8 @@
     "description": "",
     "gpo_path": "",
     "registry_key": "",
-    "value_names": [
-      "ELM_AdmPwd_PasswordComplexity",
-      "ELM_AdmPwd_PasswordLength",
-      "ELM_AdmPwd_PasswordAgeDays"
-    ],
-    "value_types": [
-      "REG_SZ"
-    ],
+    "value_names": [],
+    "value_types": [],
     "scope": "machine"
   },
   {
@@ -295,12 +245,8 @@
     "description": "",
     "gpo_path": "",
     "registry_key": "",
-    "value_names": [
-      "TXT_AdminAccountName"
-    ],
-    "value_types": [
-      "REG_SZ"
-    ],
+    "value_names": [],
+    "value_types": [],
     "scope": "machine"
   },
   {
