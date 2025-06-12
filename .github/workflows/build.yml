@@ -25,6 +25,13 @@ jobs:
 
       - name: Download confirmation page
         run: curl -L -A "Mozilla/5.0" "https://www.microsoft.com/en-us/download/confirmation.aspx?id=55319" -o page.html
+        
+      - name: Upload downloaded HTML for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: page-html
+          path: page.html
+
 
       - name: Parse ZIP URLs from static HTML
         run: python scripts/parse_static_html.py
